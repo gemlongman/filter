@@ -17,8 +17,8 @@ A1=1
 A2=0
 A3=0
 
-f1=100
-f2=5000
+f1=1000
+f2=2000
 f3=8000
 
 a=(2*Q)/wo
@@ -59,19 +59,19 @@ def filtre(e):
 	nom="toccab.wav"
 	out=w.open(nom,'w')
 	out.setparams((1,2,44100,len(e),'NONE','not compressed'))
-	Y[0,0]=e[0]
-	Y[1,0]=e[0]
+	Y[0,0]=e[0][0]
+	Y[1,0]=e[0][0]
 	for k in range(len(e)-1):
 		fri=int(Y[0,k])
 		frb=w.struct.pack("h",fri)
 		out.writeframes(frb)
 		Y[0,k+1]=Te*Y[1,k]+Y[0,k]
-		Y[1,k+1]=(Te/b)*(-Y[0,k]-a*Y[1,k]+e[k])+Y[1,k]
+		Y[1,k+1]=(Te/b)*(-Y[0,k]-a*Y[1,k]+e[k][0])+Y[1,k]
 	out.close()
 	
 
 
-filtre(open_file("tocca.wav"))
+filtre(open_file("simple440add1000.wav"))
 
 #bouton_ouvrir=Button(fenetre, text="open", command=af.ouvrir)
 #bouton_ouvrir.grid(row=200,column=150,columnspan=20,rowspan=20)

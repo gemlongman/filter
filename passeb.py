@@ -11,13 +11,14 @@ import struct
 Te=3*10**-4
 fo=100
 tau=1/(2*m.pi*fo)
+
 A1=1
 A2=1
 A3=1
 
 f1=100
-f2=5000
-f3=8000
+f2=1000
+f3=440
 
 
 listet=np.linspace(0,0.1,(1/Te))
@@ -30,26 +31,30 @@ def fourrier(signal):
 	freq=freq[0:(1/Te)//2]
 	pl.plot(freq,amplitude)
 	pl.show()
+
 def open_file(path):
 	op=wi.read(path)
 	
 	liste_frames=op[1]
-	rate=op[0]
+	#rate=op[0]
+	#print("liste_frames:",liste_frames)
 	return(liste_frames)
 
 def filtre(e):
 	nom="testout4.wav"
 	out=w.open(nom,'w')
-
 	out.setparams((1,2,44100,len(e),'NONE','not compressed'))
 
-	
 	s=[e[0]]
+	
+	# print("e:",e)
+	# print("s:",s)
 	for k in range(len(e)-1):
-		a=int((Te/tau)*e[k]+s[k]*(1-(Te/tau)))
-		
+		a=(Te/tau)*e[k]+s[k]*(1-(Te/tau))
+		#debug:
 		s+=[a]
-		b=w.struct.pack("h",a)
+		#print("s:",s)
+		b=w.struct.pack("h",int(a[0]))
 		out.writeframes(b)
 	
 	out.close()
@@ -57,6 +62,6 @@ def filtre(e):
 	
 	
 
-filtre(open_file("test3.wav"))
+filtre(open_file("simple440add1000.wav"))
 
 

@@ -35,4 +35,4 @@ def filtre(e):
 		Y[1,k+1]=Y[1,k]+Te*(Ho*(e[k+1]-2*e[k]+e[k-1])/(Te**2)-Y[0,k]*wo*wo-Y[1,k]*wo/Q)
 		print(Y[1,k+1])
 	out.close()
-filtre(open_file("tocca.wav"))
+filtre(open_file("simple440add1000.wav"))

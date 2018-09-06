@@ -32,4 +32,4 @@ def filtre(e):
 	
 	out.close()
 
-filtre(open_file("test3.wav"))
+filtre(open_file("simple440add1000.wav"))

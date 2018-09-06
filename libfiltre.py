@@ -2,14 +2,48 @@ import numpy as np
 import math as m
 import scipy.io.wavfile as wi
 import wave as w
+import struct
+
+waveparam = None
 
 def open_file(path):
 	op=wi.read(path)
-	
 	liste_frames=op[1]
-	rate=op[0]
+	#rate=op[0]
+	#print(rate) #framerate
+	#print(len(liste_frames)) #nFrames
+
+	# open WAVE file
+	spf = w.open(path,'r')
+
+	# Extract WAVE file header informations
+	global waveparam
+	waveparam	= spf.getparams()
+
+	print('\nWAVE HEADER INFORMATION:',path)
+	print('Sample Rate: ', waveparam.framerate, 'Hz')
+	print('Amp Width: ', waveparam.sampwidth)
+	print('Number of Channels: ', waveparam.nchannels, 'channels')
+	print('Number of Frames: ', waveparam.nframes, 'frames')
+	print('comptype : ', waveparam.comptype)
+	print('compname : ', waveparam.compname)
+
+	spf.close()
 	return(liste_frames)
-	
+
+def channels2one(e):
+	##debug
+	#print("len(e[0])",len(e[0]))
+	if len( e[0] ) == 1:
+		return e 
+	#else e is Double channel
+	s=[ e[0][0] / 2 + e[0][1] / 2 ]
+	for k in range(len(e)):
+		s += [ e[k][0] / 2 + e[k][1] / 2 ]
+		##debug
+		#print( k, e[k][0], e[k][1], s[k] )
+	return(s)
+
 def filtrephaut2(e,fo):
 	wo=2*m.pi*fo
 	Te=1/44100
@@ -62,13 +96,23 @@ def filtrepbande2(e,fo1,fo2):
 
 def writefile(e,nom):
 	out=w.open(nom,'w')
-	out.setparams((1,2,44100,len(e),'NONE','not compressed'))
-	for k in e:
-		try:
-			fra=w.struct.pack("h",int(k))
+	print('\nWAVE out INFORMATION:',nom)
+	print(waveparam)
+	# out.setparams((waveparam) )
+	# waveparam.nchannels maybe 2 ,but we can not support it yet
+	nchannels=1
+	out.setparams((nchannels, waveparam.sampwidth, waveparam.framerate, waveparam.nframes, waveparam.comptype, waveparam.compname))
+	if nchannels == 1:
+		for k in e:
+			fra=w.struct.pack("h", int(k))
 			out.writeframes(fra)
-		except:
-			fra=w.struct.pack("h",0)#ecrit un silence à la place d'un son saturé (c'est moin moche...)
+	elif nchannels == 2:
+		for k in e:
+			fra=w.struct.pack("hh",k[0],k[1])
+			out.writeframes(fra)
+	else:
+		for k in e:
+			fra=w.struct.pack("h",k[0])
 			out.writeframes(fra)
 	out.close()
 
