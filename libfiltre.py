@@ -2,6 +2,8 @@ import numpy as np
 import math as m
 import scipy.io.wavfile as wi
 import wave as w
+from scipy.fftpack import fft,ifft
+import matplotlib.pyplot as plt
 import struct
 
 waveparam = None
@@ -31,6 +33,28 @@ def open_file(path):
 	spf.close()
 	return(liste_frames)
 
+def writefile(e,nom):
+	out=w.open(nom,'w')
+	print('\nWAVE out INFORMATION:',nom)
+	print(waveparam)
+	# out.setparams((waveparam) )
+	# waveparam.nchannels maybe 2 ,but we can not support it yet
+	nchannels=1
+	out.setparams((nchannels, waveparam.sampwidth, waveparam.framerate, waveparam.nframes, waveparam.comptype, waveparam.compname))
+	if nchannels == 1:
+		for k in e:
+			fra=w.struct.pack("h", int(k))
+			out.writeframes(fra)
+	elif nchannels == 2:
+		for k in e:
+			fra=w.struct.pack("hh",k[0],k[1])
+			out.writeframes(fra)
+	else:
+		for k in e:
+			fra=w.struct.pack("h",k[0])
+			out.writeframes(fra)
+	out.close()
+
 def channels2one(e):
 	##debug
 	#print("len(e[0])",len(e[0]))
@@ -43,6 +67,18 @@ def channels2one(e):
 		##debug
 		#print( k, e[k][0], e[k][1], s[k] )
 	return(s)
+
+def fourrier(signal):
+	amplitude=abs(fft(signal))
+	# amplitude=amplitude[0:(1/Te)//2]
+	# freq=abs(f.fftfreq(len(signal),Te))
+	# freq=freq[0:(1/Te)//2]
+	# pl.plot(freq,amplitude)
+	# pl.show()
+
+	# debug 
+	print( amplitude )
+	return amplitude
 
 def filtrephaut2(e,fo):
 	wo=2*m.pi*fo
@@ -93,27 +129,3 @@ def filtrepbande1(e,fo1,fo2):
 	
 def filtrepbande2(e,fo1,fo2):
 	return(filtrepbas2(filtrephaut2(e,fo1),fo2))
-
-def writefile(e,nom):
-	out=w.open(nom,'w')
-	print('\nWAVE out INFORMATION:',nom)
-	print(waveparam)
-	# out.setparams((waveparam) )
-	# waveparam.nchannels maybe 2 ,but we can not support it yet
-	nchannels=1
-	out.setparams((nchannels, waveparam.sampwidth, waveparam.framerate, waveparam.nframes, waveparam.comptype, waveparam.compname))
-	if nchannels == 1:
-		for k in e:
-			fra=w.struct.pack("h", int(k))
-			out.writeframes(fra)
-	elif nchannels == 2:
-		for k in e:
-			fra=w.struct.pack("hh",k[0],k[1])
-			out.writeframes(fra)
-	else:
-		for k in e:
-			fra=w.struct.pack("h",k[0])
-			out.writeframes(fra)
-	out.close()
-
-	
